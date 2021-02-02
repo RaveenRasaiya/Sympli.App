@@ -2,6 +2,6 @@
 {
     public class SearchSettings
     {
-        public int NoOfPagesToScan { get; set; }
+        public int NoOfResultsToScan { get; set; }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Sympli.Search.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -15,74 +14,68 @@ namespace Sympli.Search.Services
     {
         public abstract string EngineUri { get; }
         public abstract string SearchPattern { get; }
-        public abstract List<int> GetPositions(Uri uri, List<Match> matches);
+        public abstract IEnumerable<int> GetPositions(Uri uri, List<Match> matches);
         protected readonly ILogger _logger;
-        private readonly IMemoryCache _memoryCache;
-        public BotBaseService(ILogger<BotBaseService> logger, IMemoryCache memoryCache)
+        private readonly IHttpApiClient _httpApiClient;
+        public BotBaseService(ILogger<BotBaseService> logger, IHttpApiClient httpApiClient)
         {
             _logger = logger;
-            _memoryCache = memoryCache;
+            _httpApiClient = httpApiClient;
         }
 
-        public async Task<string> GetPositions(string url, string keywords, int noOfPagesToScan)
+        public async Task<string> GetPositions(string url, string keywords, int noOfResults)
         {
-            ValidateParameter(url, keywords, noOfPagesToScan);
+            ValidInput(url, keywords, noOfResults);
 
             var fullyQualifiedUrl = url.ToLower().StartsWith("http") ? url : $"http://{url}";
-            var positions = await GetPageContent(keywords, new Uri(fullyQualifiedUrl), noOfPagesToScan);
+
+            var positions = await GetPageContent(keywords, new Uri(fullyQualifiedUrl), noOfResults);
 
             if (!positions.Any())
             {
-                return "0";
+                return string.Empty;
             }
             return string.Join(", ", positions);
         }
 
-        private void ValidateParameter(string url, string keyWords, int noOfPagesToScan)
+        private void ValidInput(string url, string keywords, int noOfResults)
         {
-            if (string.IsNullOrWhiteSpace(url))
+            if (string.IsNullOrEmpty(url))
             {
                 throw new ArgumentNullException(nameof(url));
             }
 
-            if (string.IsNullOrWhiteSpace(keyWords))
+            if (string.IsNullOrEmpty(keywords))
             {
-                throw new ArgumentNullException(nameof(keyWords));
+                throw new ArgumentNullException(nameof(keywords));
             }
 
-            if (noOfPagesToScan <= 0)
+            if (noOfResults <= 0)
             {
-                throw new ArgumentException($"Number of pages to scan should be greate than zero");
+                throw new ArgumentException($"Number of results to scan should be greate than zero");
             }
         }
 
-        private async Task<List<int>> GetPageContent(string keywords, Uri uri, int noOfPagesToScan)
+        private async Task<IEnumerable<int>> GetPageContent(string keywords, Uri uri, int noOfResults)
         {
-            var searchUrl = string.Format(EngineUri, noOfPagesToScan, HttpUtility.UrlEncode(keywords));
-            var searchResultRegex = $"({SearchPattern})(http+[a-zA-Z0-9--?=/]*)";
-
             try
             {
-                string content = string.Empty;
-                if (!_memoryCache.TryGetValue(searchUrl.ToUpper(), out content))
-                {
-                    var httpClient = HttpClientFactory.Create();
+                var searchUrl = string.Format(EngineUri, noOfResults, HttpUtility.UrlEncode(keywords));
 
-                    content = await httpClient.GetStringAsync(searchUrl);
+                var searchResultRegex = $"({SearchPattern})(http+[a-zA-Z0-9--?=/]*)";
 
-                    _memoryCache.Set(searchUrl.ToUpper(), content);
-                }
+                string content = await _httpApiClient.GetWebContent(searchUrl);
 
                 var matches = Regex.Matches(content, searchResultRegex);
 
                 return GetPositions(uri, matches.ToList());
+
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
+                return null;
             }
-
-            return null;
         }
     }
 }

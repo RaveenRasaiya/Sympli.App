@@ -28,6 +28,7 @@ namespace Sympli.Api
             services.AddRouting();
             services.Configure<SearchSettings>(Configuration.GetSection("SearchSettings"));
             services.AddMemoryCache();
+            services.AddScoped<IHttpApiClient, HttpApiClient>();
             services.AddScoped<ISearchRequstValidator, SearchRequstValidator>();
             services.AddScoped<IBingBotService, BingBotService>();
             services.AddScoped<IGoogleBotService, GoogleBotService>();

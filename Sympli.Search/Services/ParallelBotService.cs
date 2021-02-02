@@ -23,12 +23,13 @@ namespace Sympli.Search.Services
             var tasks = new List<Task>(searchRequestModel.SearchEngines.Count());
             foreach (var engine in searchRequestModel.SearchEngines)
             {
+
                 tasks.Add(Task.Run(async () =>
                 {
                     var _botService = _botProvider.GetBotService(engine);
                     if (_botService != null)
                     {
-                        var positions = await _botService.GetPositions(searchRequestModel.TargetUrl, searchRequestModel.Keyword, _settings.NoOfPagesToScan);
+                        var positions = await _botService.GetPositions(searchRequestModel.TargetUrl, searchRequestModel.Keyword, _settings.NoOfResultsToScan);
                         response.Result ??= new List<SearchResult>();
                         response.Result.Add(new SearchResult
                         {

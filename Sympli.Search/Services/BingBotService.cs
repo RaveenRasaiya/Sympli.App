@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Sympli.Search.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -10,7 +9,7 @@ namespace Sympli.Search.Services
 {
     public class BingBotService : BotBaseService, IBingBotService
     {
-        public BingBotService(ILogger<BingBotService> logger, IMemoryCache memoryCache) : base(logger, memoryCache)
+        public BingBotService(ILogger<BingBotService> logger, IHttpApiClient httpApiClient) : base(logger, httpApiClient)
         {
 
         }
