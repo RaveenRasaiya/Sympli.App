@@ -3,7 +3,6 @@ using Sympli.Search.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
@@ -12,9 +11,9 @@ namespace Sympli.Search.Services
 {
     public abstract class BotBaseService : IBotService
     {
-        public abstract string EngineUri { get; }
+        public abstract string BotUri { get; }
         public abstract string SearchPattern { get; }
-        public abstract IEnumerable<int> GetPositions(Uri uri, List<Match> matches);
+        public abstract List<int> GetPositions(Uri uri, List<Match> matches);
         protected readonly ILogger _logger;
         private readonly IHttpApiClient _httpApiClient;
         public BotBaseService(ILogger<BotBaseService> logger, IHttpApiClient httpApiClient)
@@ -31,11 +30,11 @@ namespace Sympli.Search.Services
 
             var positions = await GetPageContent(keywords, new Uri(fullyQualifiedUrl), noOfResults);
 
-            if (!positions.Any())
+            if (positions != null && positions.Any())
             {
-                return string.Empty;
+                return string.Join(", ", positions);
             }
-            return string.Join(", ", positions);
+            return "0";
         }
 
         private void ValidInput(string url, string keywords, int noOfResults)
@@ -60,7 +59,7 @@ namespace Sympli.Search.Services
         {
             try
             {
-                var searchUrl = string.Format(EngineUri, noOfResults, HttpUtility.UrlEncode(keywords));
+                var searchUrl = string.Format(BotUri, noOfResults, HttpUtility.UrlEncode(keywords));
 
                 var searchResultRegex = $"({SearchPattern})(http+[a-zA-Z0-9--?=/]*)";
 

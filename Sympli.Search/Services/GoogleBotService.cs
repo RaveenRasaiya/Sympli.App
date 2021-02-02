@@ -14,7 +14,7 @@ namespace Sympli.Search.Services
 
         }
 
-        public override string EngineUri
+        public override string BotUri
         {
             get
             {
