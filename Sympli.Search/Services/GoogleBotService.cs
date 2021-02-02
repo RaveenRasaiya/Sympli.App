@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Sympli.Core.Models;
 using Sympli.Search.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -9,24 +11,25 @@ namespace Sympli.Search.Services
 {
     public class GoogleBotService : BotBaseService, IGoogleBotService
     {
-        public GoogleBotService(ILogger<GoogleBotService> logger,IHttpApiClient httpApiClient) : base(logger, httpApiClient)
+        private readonly SearchSettings _searchSettings;
+        public GoogleBotService(ILogger<GoogleBotService> logger, IOptions<SearchSettings> options, IHttpApiClient httpApiClient) : base(logger, httpApiClient)
         {
-
+            _searchSettings = options.Value;
         }
 
-        public override string BotUri
+        public override string EngineUrl
         {
             get
             {
-                return "https://www.google.com/search?num={0}&q={1}";
+                return _searchSettings.Google.Url;
             }
         }
 
-        public override string SearchPattern
+        public override string RowLookPattern
         {
             get
             {
-                return "<div class=\"kCrYT\"><a href=\"/url\\?q=";
+                return _searchSettings.Google.RowLookPattern;
             }
         }
 

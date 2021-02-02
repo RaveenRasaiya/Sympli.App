@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Sympli.Core.Models;
 using Sympli.Search.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -9,23 +11,24 @@ namespace Sympli.Search.Services
 {
     public class BingBotService : BotBaseService, IBingBotService
     {
-        public BingBotService(ILogger<BingBotService> logger, IHttpApiClient httpApiClient) : base(logger, httpApiClient)
+        private readonly SearchSettings _searchSettings;
+        public BingBotService(ILogger<BingBotService> logger, IOptions<SearchSettings> options, IHttpApiClient httpApiClient) : base(logger, httpApiClient)
         {
-
+            _searchSettings = options.Value;
         }
-        public override string BotUri
+        public override string EngineUrl
         {
             get
             {
-                return "https://www.bing.com/search?count={0}&q={1}";
+                return _searchSettings.Bing.Url;
             }
         }
 
-        public override string SearchPattern
+        public override string RowLookPattern
         {
             get
             {
-                return "<li class=\"b_algo\"><h2><a href=\"";
+                return _searchSettings.Bing.RowLookPattern;
             }
         }
 
