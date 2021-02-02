@@ -65,7 +65,7 @@ namespace Sympli.Search.Services
 
                 string content = await _httpApiClient.GetWebContent(searchUrl);
 
-                var matches = Regex.Matches(content, searchResultRegex);
+                var matches = Regex.Matches(content, searchResultRegex,RegexOptions.Multiline);
 
                 return GetPositions(uri, matches.ToList());
 

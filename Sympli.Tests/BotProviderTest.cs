@@ -1,5 +1,4 @@
 ﻿using FluentAssertions;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -17,13 +16,20 @@ namespace Sympli.Tests
         private readonly Mock<ILogger<BingBotService>> _bingLogger;
         private readonly Mock<IHttpApiClient> _httpClient;
         private readonly IOptions<SearchSettings> _options;
+        private SearchSettings _settings;
         public BotProviderTest()
         {
-            _googleLogger = new Mock<ILogger<GoogleBotService>>();
-            _bingLogger = new Mock<ILogger<BingBotService>>();
-            _botProvider = new Mock<IBotProvider>();
-            _httpClient = new Mock<IHttpApiClient>();
-            var settings = new SearchSettings
+            _googleLogger   = new Mock<ILogger<GoogleBotService>>();
+            _bingLogger     = new Mock<ILogger<BingBotService>>();
+            _botProvider    = new Mock<IBotProvider>();
+            _httpClient     = new Mock<IHttpApiClient>();
+            InitConfig();
+            _options = Options.Create(_settings);
+        }
+
+        private void InitConfig()
+        {
+            _settings = new SearchSettings
             {
                 NoOfResultsToScan = 100,
                 Bing = new SearchEngine
@@ -35,7 +41,6 @@ namespace Sympli.Tests
 
                 }
             };
-            _options = Options.Create(settings);
         }
 
         [Theory]
