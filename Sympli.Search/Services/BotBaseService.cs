@@ -11,8 +11,8 @@ namespace Sympli.Search.Services
 {
     public abstract class BotBaseService : IBotService
     {
-        public abstract string BotUri { get; }
-        public abstract string SearchPattern { get; }
+        public abstract string EngineUrl { get; }
+        public abstract string RowLookPattern { get; }
         public abstract List<int> GetPositions(Uri uri, List<Match> matches);
         protected readonly ILogger _logger;
         private readonly IHttpApiClient _httpApiClient;
@@ -59,9 +59,9 @@ namespace Sympli.Search.Services
         {
             try
             {
-                var searchUrl = string.Format(BotUri, noOfResults, HttpUtility.UrlEncode(keywords));
+                var searchUrl = string.Format(EngineUrl, noOfResults, HttpUtility.UrlEncode(keywords));
 
-                var searchResultRegex = $"({SearchPattern})(http+[a-zA-Z0-9--?=/]*)";
+                var searchResultRegex = $"({RowLookPattern})(http+[a-zA-Z0-9--?=/]*)";
 
                 string content = await _httpApiClient.GetWebContent(searchUrl);
 
